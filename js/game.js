@@ -27,6 +27,11 @@ module.exports = class Game {
 
     showCell(row, col) {
         let cell = this.cells[row][col];
+        
+        if (cell.marked) {
+            return;
+        }
+        
         cell.showContent();
 
         if (cell.type == "empty") {

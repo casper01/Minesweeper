@@ -60,23 +60,36 @@
             // set handlers
             let self = this;
             div.onclick = function () {
-                self.game.showCell(row, col);
-                self.updateDivCell(cell, div);
-                if (cell.type == "empty" || cell.type == "bomb") {
-                    self.updateAllDivCells();
-                }
-                else {
-                    self.updateDivCell(cell, div);
-                }
+                self._unhideCell(self, row, col, div);
             };
             div.addEventListener('contextmenu', function (ev) {
                 ev.preventDefault();
-                self.game.setFlagToCell(row, col);
-                self.updateDivCell(cell, div);
+                self._setCellMarked(self, row, col, div);
                 return false;
             }, false);
 
             return div;
+        }
+
+        _setCellMarked(rendererContext, row, col, div) {
+            let cell = rendererContext.cellsObjects[row][col];
+            rendererContext.game.setFlagToCell(row, col);
+            rendererContext.updateDivCell(cell, div);
+        }
+
+        _unhideCell(rendererContext, row, col, div) {
+            let cell = rendererContext.cellsObjects[row][col];
+            rendererContext.game.showCell(row, col);
+            rendererContext.updateDivCell(cell, div);
+            if (cell.marked) {
+                return;
+            }
+            if (cell.type == "empty" || cell.type == "bomb") {
+                rendererContext.updateAllDivCells();
+            }
+            else {
+                rendererContext.updateDivCell(cell, div);
+            }
         }
 
         /**
