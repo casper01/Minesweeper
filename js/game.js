@@ -10,7 +10,7 @@ module.exports = class Game {
     }
 
     generateRandomMap() {
-        let bombs = this._randomizeBombPos(this.rows, this.cols, this.bombsCount);
+        let bombs = this._randomizeBombPos();
         let b = 0;
         this.cells = [];
 
@@ -47,19 +47,16 @@ module.exports = class Game {
     /**
      * Generate 1d array representing every cell in game board.
      * - 1 in the array represents bomb
-     * - 0 in the array represents empty cell
-     * @param {Number} rows 
-     * @param {Number} cols 
-     * @param {Number} bombsCount 
+     * - 0 in the array represents empty cell 
      */
-    _randomizeBombPos(rows, cols, bombsCount) {
+    _randomizeBombPos() {
         return _.shuffle(new Array(this.rows * this.cols).fill(0).fill(1, 0, this.bombsCount));
     }
 
     /**
      * Return neighbouring cells of cell in (x, y) that are 8-connected
-     * @param {*} x 
-     * @param {*} y 
+     * @param {Number} x 
+     * @param {Number} y 
      */
     _getNeighbours(x, y) {
         let neighbours = []

@@ -180,12 +180,12 @@ module.exports = class GameManager {
         /**
          * @param {Array} cellsObjects - 2d array, 1st dim are rows, 2nd are columns 
          */
-        generateMap(cellsObjects) {
-            let rows = cellsObjects.length;
+        generateMap() {
+            let rows = this.cellsObjects.length;
             if (rows == undefined || rows === 0) {
                 throw "Invalid input data";
             }
-            let cols = cellsObjects[0].length;
+            let cols = this.cellsObjects[0].length;
 
             let table = document.createElement("table");
             let divsTable = [];
@@ -195,8 +195,8 @@ module.exports = class GameManager {
                 let rowDivs = [];
                 for (let c = 0; c < cols; c++) {
                     let td = row.insertCell(-1);
-                    if (cellsObjects[r][c] == undefined) {
-                        throw "Undefined value of cellsObjects[" + r + "][" + c + "]" + cellsObjects[r][c];
+                    if (this.cellsObjects[r][c] == undefined) {
+                        throw "Undefined value of cellsObjects[" + r + "][" + c + "]" + this.cellsObjects[r][c];
                     }
                     let cellDiv = this.createDivCell(r, c);
                     td.appendChild(cellDiv);
