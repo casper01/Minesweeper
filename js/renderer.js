@@ -100,10 +100,10 @@
         _setCellMarked(rendererContext, row, col, div) {
             let cell = rendererContext.cellsObjects[row][col];
             
-            if (!cell.hidden) {
+            if (!cell.hidden || !this.game.isRunning()) {
                 return;
             }
-            
+
             rendererContext.bombsCount = cell.marked ? rendererContext.bombsCount + 1 : rendererContext.bombsCount - 1;
             rendererContext._updateBombsLeft();
 
@@ -160,10 +160,6 @@
             }
         }
 
-    }
-
-    function printTimer(secondsPassed) {
-        document.getElementById("timer").innerHTML = secondsPassed;
     }
 
 

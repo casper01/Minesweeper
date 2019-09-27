@@ -34,6 +34,9 @@ module.exports = class Game {
     }
 
     showCell(row, col) {
+        if (!this.isRunning()) {
+            return;
+        }
         let cell = this.cells[row][col];
         
         if (cell.marked) {
@@ -49,6 +52,20 @@ module.exports = class Game {
             this._showAllCells();
         }
 
+        if (!this.isRunning()) {
+            clearInterval(this.timer);
+        }
+    }
+
+    isRunning() {
+        for (let row of this.cells) {
+            for (let cell of row) {
+                if (cell.hidden && cell.type != "bomb") {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     _showNeighbouringEmptyCells(row, col) {
@@ -72,6 +89,9 @@ module.exports = class Game {
     }
 
     setFlagToCell(row, col) {
+        if (!this.isRunning()) {
+            return;
+        }
         this.cells[row][col].setFlag();
     }
 

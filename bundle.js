@@ -61,6 +61,9 @@ module.exports = class Game {
     }
 
     showCell(row, col) {
+        if (!this.isRunning()) {
+            return;
+        }
         let cell = this.cells[row][col];
         
         if (cell.marked) {
@@ -76,6 +79,20 @@ module.exports = class Game {
             this._showAllCells();
         }
 
+        if (!this.isRunning()) {
+            clearInterval(this.timer);
+        }
+    }
+
+    isRunning() {
+        for (let row of this.cells) {
+            for (let cell of row) {
+                if (cell.hidden && cell.type != "bomb") {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     _showNeighbouringEmptyCells(row, col) {
@@ -99,6 +116,9 @@ module.exports = class Game {
     }
 
     setFlagToCell(row, col) {
+        if (!this.isRunning()) {
+            return;
+        }
         this.cells[row][col].setFlag();
     }
 
@@ -292,10 +312,10 @@ module.exports = class GameManager {
         _setCellMarked(rendererContext, row, col, div) {
             let cell = rendererContext.cellsObjects[row][col];
             
-            if (!cell.hidden) {
+            if (!cell.hidden || !this.game.isRunning()) {
                 return;
             }
-            
+
             rendererContext.bombsCount = cell.marked ? rendererContext.bombsCount + 1 : rendererContext.bombsCount - 1;
             rendererContext._updateBombsLeft();
 
@@ -352,10 +372,6 @@ module.exports = class GameManager {
             }
         }
 
-    }
-
-    function printTimer(secondsPassed) {
-        document.getElementById("timer").innerHTML = secondsPassed;
     }
 
 
