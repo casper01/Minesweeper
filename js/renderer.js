@@ -5,8 +5,13 @@
     var Game = require("./game.js");
 
     class Renderer {
-        constructor(game) {
-            this.game = game;
+        constructor() {
+            let rows = 8;
+            let cols = 8;
+            let bombsCount = 10;
+            this.timer = document.getElementById("timer");
+
+            this.game = new Game(rows, cols, bombsCount, this._updateTimer);
             this.cellsObjects = this.game.cells;
             this.cellsDivs = this.generateMap(this.cellsObjects);
         }
@@ -17,6 +22,15 @@
 
         get cols() {
             return this.cellsObjects.length > 0 ? this.cellsObjects[0].length : 0;
+        }
+
+        _resetTimer() {
+            this.timer.innerHTML = 0;
+        }
+
+        _updateTimer(secondsPassed) {
+            // todo: ujednolicic this.timer i to ponizej. Kontekst nie pozwala uzyc pola. Moze utworzyc stala.
+            document.getElementById("timer").innerHTML = secondsPassed;
         }
 
         generateMap() {
@@ -128,15 +142,13 @@
 
     }
 
+    function printTimer(secondsPassed) {
+        document.getElementById("timer").innerHTML = secondsPassed;
+    }
+
 
     window.onload = function () {
-        let cells = [];
-        let rows = 8;
-        let cols = 8;
-        let bombsCount = 10;
-
-        let game = new Game(rows, cols, bombsCount);
-        let renderer = new Renderer(game);
+        new Renderer();
     }
 
 })();

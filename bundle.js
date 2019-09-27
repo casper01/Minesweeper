@@ -28,12 +28,20 @@ module.exports = class Cell {
 var Cell = require("./cell.js");
 
 module.exports = class Game {
-    constructor(rows, cols, bombsCount) {
+    constructor(rows, cols, bombsCount, timerCallback = null) {
         this.rows = rows;
         this.cols = cols;
         this.bombsCount = bombsCount;
         this.cells = [];
         this.generateRandomMap();
+        this.secondsPassed = 0;
+        let self = this;
+        this.timer = setInterval(function() {
+            self.secondsPassed++;
+            if (timerCallback) {
+                timerCallback(self.secondsPassed);
+            }
+        }, 1000);
     }
 
     generateRandomMap() {
@@ -168,14 +176,20 @@ module.exports = class Game {
 },{"./cell.js":1}],3:[function(require,module,exports){
 "use strict";
 
+var Game = require("./game.js");
+
 module.exports = class GameManager {
     constructor() {
+        this.game = null;
+    }
 
+    newGame() {
+        this.game = new Game(8, 8, 10);
     }
 
 
 }
-},{}],4:[function(require,module,exports){
+},{"./game.js":2}],4:[function(require,module,exports){
 "use strict";
 
 (function () {
@@ -183,8 +197,13 @@ module.exports = class GameManager {
     var Game = require("./game.js");
 
     class Renderer {
-        constructor(game) {
-            this.game = game;
+        constructor() {
+            let rows = 8;
+            let cols = 8;
+            let bombsCount = 10;
+            this.timer = document.getElementById("timer");
+
+            this.game = new Game(rows, cols, bombsCount, this._updateTimer);
             this.cellsObjects = this.game.cells;
             this.cellsDivs = this.generateMap(this.cellsObjects);
         }
@@ -195,6 +214,14 @@ module.exports = class GameManager {
 
         get cols() {
             return this.cellsObjects.length > 0 ? this.cellsObjects[0].length : 0;
+        }
+
+        _resetTimer() {
+            this.timer.innerHTML = 0;
+        }
+
+        _updateTimer(secondsPassed) {
+            document.getElementById("timer").innerHTML = secondsPassed;
         }
 
         generateMap() {
@@ -306,15 +333,13 @@ module.exports = class GameManager {
 
     }
 
+    function printTimer(secondsPassed) {
+        document.getElementById("timer").innerHTML = secondsPassed;
+    }
+
 
     window.onload = function () {
-        let cells = [];
-        let rows = 8;
-        let cols = 8;
-        let bombsCount = 10;
-
-        let game = new Game(rows, cols, bombsCount);
-        let renderer = new Renderer(game);
+        new Renderer();
     }
 
 })();

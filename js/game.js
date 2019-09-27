@@ -1,12 +1,20 @@
 var Cell = require("./cell.js");
 
 module.exports = class Game {
-    constructor(rows, cols, bombsCount) {
+    constructor(rows, cols, bombsCount, timerCallback = null) {
         this.rows = rows;
         this.cols = cols;
         this.bombsCount = bombsCount;
         this.cells = [];
         this.generateRandomMap();
+        this.secondsPassed = 0;
+        let self = this;
+        this.timer = setInterval(function() {
+            self.secondsPassed++;
+            if (timerCallback) {
+                timerCallback(self.secondsPassed);
+            }
+        }, 1000);
     }
 
     generateRandomMap() {
