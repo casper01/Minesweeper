@@ -1,10 +1,22 @@
+"use strict";
+
 (function () {
     var Cell = require("./cell.js");
+    var Game = require("./game.js");
 
     class Renderer {
-        constructor(cellsObjects) {
-            this.cellsObjects = cellsObjects;
+        constructor(game) {
+            this.game = game;
+            this.cellsObjects = this.game.cells;
             this.cellsDivs = this.generateMap(this.cellsObjects);
+        }
+
+        get rows() {
+            return this.cellsObjects.length;
+        }
+
+        get cols() {
+            return this.cellsObjects.length > 0 ? this.cellsObjects[0].length : 0;
         }
 
         /**
@@ -22,17 +34,19 @@
 
             for (let r = 0; r < rows; r++) {
                 let row = table.insertRow(-1);
-                let tds = [];
+                let rowDivs = [];
                 for (let c = 0; c < cols; c++) {
                     let td = row.insertCell(-1);
-                    tds.push(td);
                     if (cellsObjects[r][c] == undefined) {
                         throw "Undefined value of cellsObjects[" + r + "][" + c + "]" + cellsObjects[r][c];
                     }
-                    td.appendChild(this.createDivCell(cellsObjects[r][c]));
+                    let cellDiv = this.createDivCell(r, c);
+                    td.appendChild(cellDiv);
+                    rowDivs.push(cellDiv);
                 }
-                divsTable.push(tds);
+                divsTable.push(rowDivs);
             }
+
             document.body.appendChild(table);
             return divsTable;
         }
@@ -40,25 +54,32 @@
         /**
          * @param {Cell} cell - cell object converted to div
          */
-        createDivCell(cell) {
-            let div = document.createElement("div");
-            this.updateDivCell(cell, div);
+        createDivCell(row, col) {
             let self = this;
+            let div = document.createElement("div");
+            let cell = this.cellsObjects[row][col];
+            this.updateDivCell(cell, div);
 
-            div.onclick = function() {
-                cell.showContent();
+            div.onclick = function () {
+                self.game.showCell(row, col);
                 self.updateDivCell(cell, div);
+                if (cell.type != "empty") {
+                    self.updateDivCell(cell, div);
+                }
+                else {
+                    self.updateAllDivCells();
+                }
             };
-            div.addEventListener('contextmenu', function(ev) {
+            div.addEventListener('contextmenu', function (ev) {
                 ev.preventDefault();
-                cell.setFlag();
+                self.game.setFlagToCell(row, col);
                 self.updateDivCell(cell, div);
                 return false;
             }, false);
 
             return div;
         }
-    
+
         /**
          * @param {Cell} cell - cell converted to div
          */
@@ -70,7 +91,7 @@
                 div.style.background = cell.marked ? "blue" : "gray";
             }
             else {
-                switch(cell.type) {
+                switch (cell.type) {
                     case "bomb":
                         div.style.background = "red";
                         break;
@@ -84,66 +105,25 @@
             }
         }
 
-    }
-
-
-
-    
-
-    function generateBombMap(rows, cols, bombsCount) {
-        return _.shuffle(new Array(rows * cols).fill(0).fill(1, 0, bombsCount));
-    }
-
-    function countBombsInNeighbourhood(cells, x, y) {
-        let bombs = 0;
-        for (let i = x - 1; i < x + 2; i++) {
-            for (let j = y - 1; j < y + 2; j++) {
-                if (i < 0 || j < 0 || i >= cells.length || j >= cells[x].length) {
-                    continue;
-                }
-                if (cells[i][j].type == "bomb") {
-                    bombs++;
+        updateAllDivCells() {
+            for (let r = 0; r < this.rows; r++) {
+                for (let c = 0; c < this.cols; c++) {
+                    this.updateDivCell(this.cellsObjects[r][c], this.cellsDivs[r][c]);
                 }
             }
         }
-        return bombs;
+
     }
 
-    function makeCellsNumbers(cells) {
-        for (let x = 0; x < cells.length; x++) {
-            for (let y = 0; y < cells[x].length; y++) {
-                if (cells[x][y].type != "empty") {
-                    continue;
-                }
-                let bombsCount = countBombsInNeighbourhood(cells, x, y);
-                if (bombsCount == 0) {
-                    continue;
-                }
-                cells[x][y].type = String(bombsCount);
-            }
-        }
-    }
 
     window.onload = function () {
         let cells = [];
         let rows = 8;
         let cols = 8;
         let bombsCount = 10;
-        let bombs = generateBombMap(rows, cols, bombsCount);
-        let b = 0;
 
-        for (let i = 0; i < rows; i++) {
-            let row = [];
-            for (let j = 0; j < cols; j++) {
-                row.push(new Cell(bombs[b]));
-                b++;
-            }
-            cells.push(row);
-        }
-        makeCellsNumbers(cells);
-        console.log(cells);
-        
-        let renderer = new Renderer(cells);
+        let game = new Game(rows, cols, bombsCount);
+        let renderer = new Renderer(game);
     }
 
 })();
