@@ -8,12 +8,15 @@
         constructor() {
             let rows = 8;
             let cols = 8;
-            let bombsCount = 10;
+            this.bombsCount = 10;
             this.timer = document.getElementById("timer");
-
-            this.game = new Game(rows, cols, bombsCount, this._updateTimer);
+            this.bombsLeft = document.getElementById("bombs-left");
+            
+            this.game = new Game(rows, cols, this.bombsCount, this._updateTimer);
             this.cellsObjects = this.game.cells;
             this.cellsDivs = this.generateMap(this.cellsObjects);
+            this._resetTimer();
+            this._resetBombsLeft();
         }
 
         get rows() {
@@ -28,10 +31,19 @@
             this.timer.innerHTML = 0;
         }
 
+        _resetBombsLeft() {
+            this.bombsCount = this.game.bombsCount;
+            this.bombsLeft.innerHTML = this.game.bombsCount;
+        }
+
         _updateTimer(secondsPassed) {
-            // todo: ujednolicic this.timer i to ponizej. Kontekst nie pozwala uzyc pola. Moze utworzyc stala.
+            // TODO: ujednolicic this.timer i to ponizej. Kontekst nie pozwala uzyc pola. Moze utworzyc stala.
             document.getElementById("timer").innerHTML = secondsPassed;
         }
+
+        _updateBombsLeft() {
+            this.bombsLeft.innerHTML = this.bombsCount;
+        } 
 
         generateMap() {
             let rows = this.cellsObjects.length;
@@ -87,6 +99,14 @@
 
         _setCellMarked(rendererContext, row, col, div) {
             let cell = rendererContext.cellsObjects[row][col];
+            
+            if (!cell.hidden) {
+                return;
+            }
+            
+            rendererContext.bombsCount = cell.marked ? rendererContext.bombsCount + 1 : rendererContext.bombsCount - 1;
+            rendererContext._updateBombsLeft();
+
             rendererContext.game.setFlagToCell(row, col);
             rendererContext.updateDivCell(cell, div);
         }
