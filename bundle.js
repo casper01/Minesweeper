@@ -10,8 +10,8 @@ module.exports = class Cell {
         this.type = containsBomb ? "bomb" : "empty";
     }
 
-    showContent() {
-        if (!this.hidden || this.marked) {
+    showContent(showMarked = false) {
+        if (this.marked && !showMarked) {
             return;
         }
         this.hidden = false;
@@ -37,7 +37,7 @@ module.exports = class Game {
     }
 
     generateRandomMap() {
-        let bombs = this._randomizeBombPos(this.rows, this.cols, this.bombsCount);
+        let bombs = this._randomizeBombPos();
         let b = 0;
         this.cells = [];
 
@@ -57,16 +57,35 @@ module.exports = class Game {
         cell.showContent();
 
         if (cell.type == "empty") {
-            let neighbours = this._getNeighbours(row, col);
-            for (let n of neighbours) {
-                if (n.cell.hidden && !n.cell.marked) {
-                    this.showCell(n.row, n.col);
-                }
-            }
+            this._showNeighbouringEmptyCells(row, col);
+        }
+        if (cell.type == "bomb") {
+            this._showAllCells();
         }
 
     }
-    
+
+    _showNeighbouringEmptyCells(row, col) {
+        let neighbours = this._getNeighbours(row, col);
+        for (let n of neighbours) {
+            if (n.cell.hidden && !n.cell.marked) {
+                n.cell.showContent();
+                if (n.cell.type == "empty") {
+                    this._showNeighbouringEmptyCells(n.row, n.col);
+                    console.log(n.row, n.col);
+                }
+            }
+        }
+    }
+
+    _showAllCells() {
+        for (let r = 0; r < this.rows; r++) {
+            for (let c = 0; c < this.cols; c++) {
+                this.cells[r][c].showContent(true);
+            }
+        }
+    }
+
     setFlagToCell(row, col) {
         this.cells[row][col].setFlag();
     }
@@ -74,23 +93,20 @@ module.exports = class Game {
     /**
      * Generate 1d array representing every cell in game board.
      * - 1 in the array represents bomb
-     * - 0 in the array represents empty cell
-     * @param {Number} rows 
-     * @param {Number} cols 
-     * @param {Number} bombsCount 
+     * - 0 in the array represents empty cell 
      */
-    _randomizeBombPos(rows, cols, bombsCount) {
+    _randomizeBombPos() {
         return _.shuffle(new Array(this.rows * this.cols).fill(0).fill(1, 0, this.bombsCount));
     }
 
     /**
      * Return neighbouring cells of cell in (x, y) that are 8-connected
-     * @param {*} x 
-     * @param {*} y 
+     * @param {Number} x 
+     * @param {Number} y 
      */
     _getNeighbours(x, y) {
         let neighbours = []
-        
+
         for (let i = x - 1; i < x + 2; i++) {
             for (let j = y - 1; j < y + 2; j++) {
                 if (i < 0 || j < 0 || i >= this.cells.length || j >= this.cells[x].length) {
@@ -153,7 +169,7 @@ module.exports = class GameManager {
 
     }
 
-    
+
 }
 },{}],4:[function(require,module,exports){
 "use strict";
@@ -177,9 +193,6 @@ module.exports = class GameManager {
             return this.cellsObjects.length > 0 ? this.cellsObjects[0].length : 0;
         }
 
-        /**
-         * @param {Array} cellsObjects - 2d array, 1st dim are rows, 2nd are columns 
-         */
         generateMap() {
             let rows = this.cellsObjects.length;
             if (rows == undefined || rows === 0) {
@@ -210,22 +223,24 @@ module.exports = class GameManager {
         }
 
         /**
-         * @param {Cell} cell - cell object converted to div
+         * @param {Number} row - row of processed cell on the board
+         * @param {Number} col - col of processed cell on the board
          */
         createDivCell(row, col) {
-            let self = this;
             let div = document.createElement("div");
             let cell = this.cellsObjects[row][col];
             this.updateDivCell(cell, div);
-
+            
+            // set handlers
+            let self = this;
             div.onclick = function () {
                 self.game.showCell(row, col);
                 self.updateDivCell(cell, div);
-                if (cell.type != "empty") {
-                    self.updateDivCell(cell, div);
+                if (cell.type == "empty" || cell.type == "bomb") {
+                    self.updateAllDivCells();
                 }
                 else {
-                    self.updateAllDivCells();
+                    self.updateDivCell(cell, div);
                 }
             };
             div.addEventListener('contextmenu', function (ev) {
@@ -240,6 +255,7 @@ module.exports = class GameManager {
 
         /**
          * @param {Cell} cell - cell converted to div
+         * @param div - div that represents the cell
          */
         updateDivCell(cell, div) {
             div.style.width = cell.width + "px";

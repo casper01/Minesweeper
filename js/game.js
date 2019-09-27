@@ -30,16 +30,34 @@ module.exports = class Game {
         cell.showContent();
 
         if (cell.type == "empty") {
-            let neighbours = this._getNeighbours(row, col);
-            for (let n of neighbours) {
-                if (n.cell.hidden && !n.cell.marked) {
-                    this.showCell(n.row, n.col);
-                }
-            }
+            this._showNeighbouringEmptyCells(row, col);
+        }
+        if (cell.type == "bomb") {
+            this._showAllCells();
         }
 
     }
-    
+
+    _showNeighbouringEmptyCells(row, col) {
+        let neighbours = this._getNeighbours(row, col);
+        for (let n of neighbours) {
+            if (n.cell.hidden && !n.cell.marked) {
+                n.cell.showContent();
+                if (n.cell.type == "empty") {
+                    this._showNeighbouringEmptyCells(n.row, n.col);
+                }
+            }
+        }
+    }
+
+    _showAllCells() {
+        for (let r = 0; r < this.rows; r++) {
+            for (let c = 0; c < this.cols; c++) {
+                this.cells[r][c].showContent(true);
+            }
+        }
+    }
+
     setFlagToCell(row, col) {
         this.cells[row][col].setFlag();
     }
@@ -60,7 +78,7 @@ module.exports = class Game {
      */
     _getNeighbours(x, y) {
         let neighbours = []
-        
+
         for (let i = x - 1; i < x + 2; i++) {
             for (let j = y - 1; j < y + 2; j++) {
                 if (i < 0 || j < 0 || i >= this.cells.length || j >= this.cells[x].length) {

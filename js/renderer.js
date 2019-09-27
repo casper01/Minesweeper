@@ -62,11 +62,11 @@
             div.onclick = function () {
                 self.game.showCell(row, col);
                 self.updateDivCell(cell, div);
-                if (cell.type != "empty") {
-                    self.updateDivCell(cell, div);
+                if (cell.type == "empty" || cell.type == "bomb") {
+                    self.updateAllDivCells();
                 }
                 else {
-                    self.updateAllDivCells();
+                    self.updateDivCell(cell, div);
                 }
             };
             div.addEventListener('contextmenu', function (ev) {

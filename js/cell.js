@@ -9,8 +9,8 @@ module.exports = class Cell {
         this.type = containsBomb ? "bomb" : "empty";
     }
 
-    showContent() {
-        if (!this.hidden || this.marked) {
+    showContent(showMarked = false) {
+        if (this.marked && !showMarked) {
             return;
         }
         this.hidden = false;
