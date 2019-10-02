@@ -215,6 +215,7 @@ module.exports = class GameManager {
 (function () {
     var Cell = require("./cell.js");
     var Game = require("./game.js");
+    var settings = require("./settings.js");
 
     class Renderer {
         constructor() {
@@ -265,6 +266,8 @@ module.exports = class GameManager {
             let cols = this.cellsObjects[0].length;
 
             let table = document.createElement("table");
+            table.setAttribute("cellspacing", "0");
+            table.setAttribute("cellpadding", "0");
             let divsTable = [];
 
             for (let r = 0; r < rows; r++) {
@@ -294,6 +297,10 @@ module.exports = class GameManager {
             let div = document.createElement("div");
             let cell = this.cellsObjects[row][col];
             this.updateDivCell(cell, div);
+
+            // set layout
+            div.style.webkitBoxShadow = "inset 0 0 14px 0px rgba(0, 0, 0, 1)";
+            div.style.boxShadow = "inset 0 0 3px 0px rgba(0, 0, 0, 1)";
             
             // set handlers
             let self = this;
@@ -343,25 +350,59 @@ module.exports = class GameManager {
          * @param div - div that represents the cell
          */
         updateDivCell(cell, div) {
+            // TODO: https://looka.com/blog/logo-color-combinations/
             div.style.width = cell.width + "px";
-            div.style.height = cell.height + "px";
+            div.style.height = cell.height + "px"; // TODO: height == width
+            div.style.backgroundSize = cell.width + "px";
 
             if (cell.hidden) {
-                div.style.background = cell.marked ? "blue" : "gray";
+                div.style.background = cell.marked ? this.setDivBackgroundImage(div, settings.images.flag) : this.setDivBackgroundImage(div, settings.images.hiddenCell);
             }
             else {
                 switch (cell.type) {
                     case "bomb":
-                        div.style.background = "red";
+                        this.setDivBackgroundImage(div, settings.images.bomb);
                         break;
                     case "empty":
-                        div.style.background = "white";
+                        this.setDivBackgroundImage(div, settings.images.emptyCell);
                         break;
                     default:
-                        div.style.background = "white";
-                        div.innerHTML = cell.type;
+                        switch(parseInt(cell.type)) {
+                            case 1:
+                                this.setDivBackgroundImage(div, settings.images.num1);
+                                break;
+                            case 2:
+                                this.setDivBackgroundImage(div, settings.images.num2);
+                                break;
+                            case 3:
+                                this.setDivBackgroundImage(div, settings.images.num3);
+                                break;
+                            case 4:
+                                this.setDivBackgroundImage(div, settings.images.num4);
+                                break;
+                            case 5:
+                                this.setDivBackgroundImage(div, settings.images.num5);
+                                break;
+                            case 6:
+                                this.setDivBackgroundImage(div, settings.images.num6);
+                                break;
+                            case 7:
+                                this.setDivBackgroundImage(div, settings.images.num7);
+                                break;
+                            case 8:
+                                this.setDivBackgroundImage(div, settings.images.num8);
+                                break;
+                            default:
+                                console.warn("cannot read number of neighbouring cells");
+                                this.setDivBackgroundImage(div, settings.images.emptyCell);
+                                break;
+                        }
                 }
             }
+        }
+
+        setDivBackgroundImage(div, imageUrl) {
+            div.style.backgroundImage = 'url("' + imageUrl + '")';
         }
 
         updateAllDivCells() {
@@ -381,4 +422,25 @@ module.exports = class GameManager {
 
 })();
 
-},{"./cell.js":1,"./game.js":2}]},{},[1,2,3,4]);
+},{"./cell.js":1,"./game.js":2,"./settings.js":5}],5:[function(require,module,exports){
+module.exports = {
+    images: {
+        num1: "./images/num1.png",
+        num2: "./images/num2.png",
+        num3: "./images/num3.png",
+        num4: "./images/num4.png",
+        num5: "./images/num5.png",
+        num6: "./images/num6.png",
+        num7: "./images/num7.png",
+        num8: "./images/num8.png",
+        flag: "./images/flag.png",
+        invalidFlag: "./images/invalidFlag.png",
+        hiddenCell: "./images/hidden.png",
+        emptyCell: "./images/empty.png",
+        bomb: "./images/bomb.png",
+        bombClicked: "./images/bombClicked.png"
+    }
+}
+
+
+},{}]},{},[1,2,3,4,5]);
