@@ -8,15 +8,6 @@ div {
     text-align: center;
 }
 
-.flip-horizontal-bottom{
-    animation:flip-horizontal-bottom .4s cubic-bezier(.455,.03,.515,.955) both
-}
-
-@keyframes flip-horizontal-bottom {
-    0% {
-        transform: rotateX(0);
-    }
-    100% {
-        transform: rotateX(-180deg);
-    }
+.flip{
+    transform: rotateX(-180deg);
 }
