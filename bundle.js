@@ -67,14 +67,18 @@ module.exports = class Cell {
 var settings = require("./settings.js");
 
 module.exports = class Context {
-    constructor(rows, cols, onCellClickHandler) {
+    constructor(rows, cols, levelInd, onCellClickHandler, onLevelChangeHandler) {
+        this._initHTML();
         this.rows = rows;
         this.cols = cols;
         this.cellWidth = 100;
         this._onCellClickHandler = onCellClickHandler;
+        this._onLevelChangeHandler = onLevelChangeHandler;
+        this._initSelectBox();
         this.divsTable = this._createTable();
+        this.setLevel(levelInd);
     }
-    
+
     flipTo(row, col, type) {
         let cell = this.divsTable[row][col].tableCell;
         let frontDiv = this.divsTable[row][col].frontDiv;
@@ -90,6 +94,12 @@ module.exports = class Context {
 
     }
 
+    setLevel(levelInd) {
+        let select = document.getElementById("levelSelector");
+        let levelGraphics = select.options[levelInd].innerHTML;
+        document.getElementsByClassName("select-selected")[0].innerHTML = levelGraphics;
+    }
+
     setClock(val) {
         document.getElementById(settings.timerId).innerHTML = val;
     }
@@ -100,14 +110,14 @@ module.exports = class Context {
 
     showVictoryScreen() {
         document.body.classList.add("pyro");
-        setTimeout(function() {
+        setTimeout(function () {
             document.body.classList.remove("pyro");
         }, settings.victoryScreenTime);
     }
-    
+
     showFailureScreen() {
         document.body.classList.add("shake-hard");
-        setTimeout(function() {
+        setTimeout(function () {
             document.body.classList.remove("shake-hard");
         }, settings.failureScreenTime);
     }
@@ -132,7 +142,7 @@ module.exports = class Context {
                 let backCellDiv = this._createBackDivCell(r, c);
                 td.appendChild(frontCellDiv);
                 td.appendChild(backCellDiv);
-                
+
                 rowStruct.push({
                     frontDiv: frontCellDiv,
                     backDiv: backCellDiv,
@@ -166,10 +176,10 @@ module.exports = class Context {
      */
     _createFrontDivCell(row, col) {
         let div = document.createElement("div");
-        
+
         this._setDivCellStyle(div);
         div.style.background = this._setDivBackgroundImage(div, settings.images.hiddenCell);
-        
+
         // set handlers
         let self = this;
         div.onclick = function () {
@@ -189,7 +199,7 @@ module.exports = class Context {
 
         this._setDivCellStyle(div);
         div.style.transform = "rotateX(180deg)";
-        
+
         // set handlers
         let self = this;
         div.onclick = function () {
@@ -225,7 +235,7 @@ module.exports = class Context {
      * @param {String} cellType - type of cell, ex. "bomb", "empty" or number 1-8
      */
     _getCellBackImage(cellType) {
-        switch(cellType) {
+        switch (cellType) {
             case settings.cellType.hidden:
                 return settings.images.hiddenCell;
             case settings.cellType.marked:
@@ -263,6 +273,131 @@ module.exports = class Context {
     _setDivBackgroundImage(div, imageUrl) {
         div.style.backgroundImage = 'url("' + imageUrl + '")';
     }
+
+    _initSelectBox() {
+        let self = this;
+        var x, i, j, selElmnt, a, b, c;
+
+        // TODO: no chyba niepotrzebne
+        // function selectOption(selectedInd) {
+        //     let div = document.getElementsByClassName("select-items")[0].childNodes[selectedInd];
+        //     let s = document.getElementById("levelSelector");
+
+        //     s.selectedIndex = i;
+        //     h.innerHTML = this.innerHTML;
+        //     y = this.parentNode.getElementsByClassName("same-as-selected");
+        //     for (k = 0; k < y.length; k++) {
+        //         y[k].removeAttribute("class");
+        //     }
+        //     this.setAttribute("class", "same-as-selected");
+        // }
+
+        /* Look for any elements with the class "custom-select": */
+        x = document.getElementsByClassName("custom-select");
+        for (i = 0; i < x.length; i++) {
+            selElmnt = x[i].getElementsByTagName("select")[0];
+            /* For each element, create a new DIV that will act as the selected item: */
+            a = document.createElement("DIV");
+            a.setAttribute("class", "select-selected");
+            a.innerHTML = selElmnt.options[selElmnt.selectedIndex].innerHTML;
+            x[i].appendChild(a);
+            /* For each element, create a new DIV that will contain the option list: */
+            b = document.createElement("DIV");
+            b.setAttribute("class", "select-items select-hide");
+            for (j = 0; j < selElmnt.length; j++) {
+                /* For each option in the original select element,
+                create a new DIV that will act as an option item: */
+                c = document.createElement("DIV");
+                c.innerHTML = selElmnt.options[j].innerHTML;
+                c.addEventListener("click", function (e) {
+                    /* When an item is clicked, update the original select box,
+                    and the selected item: */
+                    var y, i, k, s, h;
+                    s = this.parentNode.parentNode.getElementsByTagName("select")[0];
+                    h = this.parentNode.previousSibling;
+                    for (i = 0; i < s.length; i++) {
+                        if (s.options[i].innerHTML == this.innerHTML) {
+                            s.selectedIndex = i;
+                            h.innerHTML = this.innerHTML;
+                            y = this.parentNode.getElementsByClassName("same-as-selected");
+                            for (k = 0; k < y.length; k++) {
+                                y[k].removeAttribute("class");
+                            }
+                            this.setAttribute("class", "same-as-selected");
+                            break;
+                        }
+                    }
+                    h.click();
+                    self._onLevelChangeHandler(selElmnt.options[selElmnt.selectedIndex].value);
+                });
+                b.appendChild(c);
+            }
+            x[i].appendChild(b);
+            a.addEventListener("click", function (e) {
+                /* When the select box is clicked, close any other select boxes,
+                and open/close the current select box: */
+                e.stopPropagation();
+                closeAllSelect(this);
+                this.nextSibling.classList.toggle("select-hide");
+                this.classList.toggle("select-arrow-active");
+            });
+        }
+
+        function closeAllSelect(elmnt) {
+            /* A function that will close all select boxes in the document,
+            except the current select box: */
+            var x, y, i, arrNo = [];
+            x = document.getElementsByClassName("select-items");
+            y = document.getElementsByClassName("select-selected");
+            for (i = 0; i < y.length; i++) {
+                if (elmnt == y[i]) {
+                    arrNo.push(i)
+                } else {
+                    y[i].classList.remove("select-arrow-active");
+                }
+            }
+            for (i = 0; i < x.length; i++) {
+                if (arrNo.indexOf(i)) {
+                    x[i].classList.add("select-hide");
+                }
+            }
+        }
+
+        /* If the user clicks anywhere outside the select box,
+        then close all select boxes: */
+        document.addEventListener("click", closeAllSelect);
+
+        // selecting an option // TODO: zapetla sie
+        // document.getElementsByClassName("select-items")[0].childNodes[selectedIndex].click();
+    }
+
+    _initHTML() {
+        document.body.innerHTML = `<div class="infobox">
+        Level:
+        <div class="custom-select" style="width:100px;">
+            <select id="levelSelector">
+                <option value="0" selected="selected">&#9733;</option>
+                <option value="1">&#9733;&#9733;</option>
+                <option value="2">&#9733;&#9733;&#9733;</option>
+            </select>
+        </div>
+        
+        <div class="info-element">
+            <div class="image">
+                <img src="images/clockIcon.png" />
+            </div>
+            <div id="timer" class="text"></div>
+        </div>
+        <div class="info-element">
+            <div class="image">
+                <img src="images/bombIcon.png" />
+            </div>
+            <div id="bombs-left" class="text"></div>
+        </div>
+    </div>
+    <div class="before"></div>
+    <div class="after"></div>`;
+    }
 }
 },{"./settings.js":5}],3:[function(require,module,exports){
 var Context = require("./context.js");
@@ -274,10 +409,11 @@ module.exports = class Game {
      * @param {Context} ctx - context of the screen
      */
     constructor() {
+        this.level = 1;
         this.rows = 8;
         this.cols = 8;
-        this.bombsCount = 10;
-        this.ctx = new Context(this.rows, this.cols, this.onCellClicked.bind(this));
+        this.levelBombs = 10;
+        this.ctx = new Context(this.rows, this.cols, this.level, this.onCellClicked.bind(this), this.setLevelConfig.bind(this));
         this.reset();
     }
 
@@ -287,7 +423,7 @@ module.exports = class Game {
      */
     _setTimer() {
         let self = this;
-        return setInterval(function() {
+        return setInterval(function () {
             self.secondsPassed++;
             self.ctx.setClock(self.secondsPassed);
         }, 1000);
@@ -297,11 +433,10 @@ module.exports = class Game {
      * Reset game to new, unplayed game
      */
     reset() {
-        this.rows = 8;
-        this.cols = 8;
-        this.bombsCount = 10;   // TODO: powtorzenie
+        this.bombsCount = this.levelBombs;
         this.cells = this._generateRandomMap();
         this.secondsPassed = 0;
+        clearInterval(this.timer);
         this.timer = this._setTimer();
         this.cellsLeftToUnhide = this.rows * this.cols - this.bombsCount;
         this._status = "playing";
@@ -399,6 +534,31 @@ module.exports = class Game {
         return bombs;
     }
 
+    setLevelConfig(newLevel) {
+        switch (parseInt(newLevel)) {
+            case 0:
+                this.rows = 4;
+                this.cols = 4;
+                this.levelBombs = 5;
+                console.log("1");
+                break;
+            case 1:
+                this.rows = 8;
+                this.cols = 8;
+                this.levelBombs = 10;
+                console.log("2");
+                break;
+            case 2:
+                this.rows = 10;
+                this.cols = 10;
+                this.levelBombs = 12;
+                console.log("3");
+                break;
+        }
+        this.ctx = new Context(this.rows, this.cols, newLevel, this.onCellClicked.bind(this), this.setLevelConfig.bind(this));
+        this.reset();
+    }
+
     /**
      * Invoke handler when mouse clicks one of cell
      * @param {String} mouseButton - mouse button type: "left" or "right" 
@@ -412,7 +572,7 @@ module.exports = class Game {
             return;
         }
 
-        if(mouseButton == "left") {
+        if (mouseButton == "left") {
             this._leftButtonClicked(row, col);
         }
         else if (mouseButton == "right") {
@@ -449,14 +609,14 @@ module.exports = class Game {
         }
         this._setFlagToCell(row, col);
     }
-    
+
     _setGameWon() {
         this._status = settings.gameStatus.won;
         this._showAllCells(false);
         clearInterval(this.timer);
         this.ctx.showVictoryScreen();
     }
-    
+
     _setGameLost() {
         this._status = settings.gameStatus.lost;
         this._showAllCells(true);
@@ -478,7 +638,7 @@ module.exports = class Game {
         let cell = this.cells[row][col];
         cell.setVisibility(true);
         this.ctx.flipTo(row, col, cell.front);
-        
+
         if (!cell.isBomb()) {
             this.cellsLeftToUnhide--;
         }

@@ -15,3 +15,80 @@ div {
 .before, .after {
     z-index: 10;
 }
+
+.infobox {
+    color: #00529b;
+    background-color: #bde5f8;
+    border: 2px solid;
+}
+
+.info-element {
+    display: inline-block;
+    padding: 10px;
+}
+
+.info-element .image {
+    display: inline-block;
+}
+
+.info-element .text {
+    display: inline-block;
+    height: 100%;
+    min-width: 50px;
+}
+
+.info-element .image img {
+    width: 30px;
+    vertical-align: middle;
+}
+
+
+
+
+
+
+/* The container must be positioned relative: */
+.custom-select {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .custom-select select {
+    display: none; /*hide original SELECT element: */
+  }
+  
+  .select-selected {
+    background-color: #bde5f8;
+  }
+
+  .select-selected:hover {
+    background-color: #a3dbf5;
+  }
+
+  /* style the items (options), including the selected item: */
+  .select-items div,.select-selected {
+    color: #00529b;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-color: transparent;
+    cursor: pointer;
+  }
+  
+  /* Style items (options): */
+  .select-items {
+    position: absolute;
+    background-color: #bde5f8;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 99;
+  }
+  
+  /* Hide the items when the select box is closed: */
+  .select-hide {
+    display: none;
+  }
+  
+  .select-items div:hover, .same-as-selected {
+    background-color: #a3dbf5;
+  }

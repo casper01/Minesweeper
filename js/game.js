@@ -7,10 +7,11 @@ module.exports = class Game {
      * @param {Context} ctx - context of the screen
      */
     constructor() {
+        this.level = 1;
         this.rows = 8;
         this.cols = 8;
-        this.bombsCount = 10;
-        this.ctx = new Context(this.rows, this.cols, this.onCellClicked.bind(this));
+        this.levelBombs = 10;
+        this.ctx = new Context(this.rows, this.cols, this.level, this.onCellClicked.bind(this), this.setLevelConfig.bind(this));
         this.reset();
     }
 
@@ -20,7 +21,7 @@ module.exports = class Game {
      */
     _setTimer() {
         let self = this;
-        return setInterval(function() {
+        return setInterval(function () {
             self.secondsPassed++;
             self.ctx.setClock(self.secondsPassed);
         }, 1000);
@@ -30,11 +31,10 @@ module.exports = class Game {
      * Reset game to new, unplayed game
      */
     reset() {
-        this.rows = 8;
-        this.cols = 8;
-        this.bombsCount = 10;   // TODO: powtorzenie
+        this.bombsCount = this.levelBombs;
         this.cells = this._generateRandomMap();
         this.secondsPassed = 0;
+        clearInterval(this.timer);
         this.timer = this._setTimer();
         this.cellsLeftToUnhide = this.rows * this.cols - this.bombsCount;
         this._status = "playing";
@@ -132,6 +132,31 @@ module.exports = class Game {
         return bombs;
     }
 
+    setLevelConfig(newLevel) {
+        switch (parseInt(newLevel)) {
+            case 0:
+                this.rows = 4;
+                this.cols = 4;
+                this.levelBombs = 5;
+                console.log("1");
+                break;
+            case 1:
+                this.rows = 8;
+                this.cols = 8;
+                this.levelBombs = 10;
+                console.log("2");
+                break;
+            case 2:
+                this.rows = 10;
+                this.cols = 10;
+                this.levelBombs = 12;
+                console.log("3");
+                break;
+        }
+        this.ctx = new Context(this.rows, this.cols, newLevel, this.onCellClicked.bind(this), this.setLevelConfig.bind(this));
+        this.reset();
+    }
+
     /**
      * Invoke handler when mouse clicks one of cell
      * @param {String} mouseButton - mouse button type: "left" or "right" 
@@ -145,7 +170,7 @@ module.exports = class Game {
             return;
         }
 
-        if(mouseButton == "left") {
+        if (mouseButton == "left") {
             this._leftButtonClicked(row, col);
         }
         else if (mouseButton == "right") {
@@ -182,14 +207,14 @@ module.exports = class Game {
         }
         this._setFlagToCell(row, col);
     }
-    
+
     _setGameWon() {
         this._status = settings.gameStatus.won;
         this._showAllCells(false);
         clearInterval(this.timer);
         this.ctx.showVictoryScreen();
     }
-    
+
     _setGameLost() {
         this._status = settings.gameStatus.lost;
         this._showAllCells(true);
@@ -211,7 +236,7 @@ module.exports = class Game {
         let cell = this.cells[row][col];
         cell.setVisibility(true);
         this.ctx.flipTo(row, col, cell.front);
-        
+
         if (!cell.isBomb()) {
             this.cellsLeftToUnhide--;
         }
