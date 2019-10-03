@@ -27,11 +27,11 @@ module.exports = class Context {
     }
 
     setClock(val) {
-
+        document.getElementById(settings.timerId).innerHTML = val;
     }
 
     setBombsLeft(val) {
-
+        document.getElementById(settings.bombsLeftId).innerHTML = val;
     }
 
     showVictoryScreen() {
@@ -79,6 +79,7 @@ module.exports = class Context {
     _setMainMapAttributes(table) {
         table.setAttribute("cellspacing", "0");
         table.setAttribute("cellpadding", "0");
+        table.style.background = "#191716";
     }
 
     _setMapCellAttributes(td) {

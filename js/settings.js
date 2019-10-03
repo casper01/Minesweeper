@@ -27,6 +27,8 @@ module.exports = {
         won: "won",
         lost: "lost",
         playing: "playing"
-    }
+    },
+    timerId: "timer",
+    bombsLeftId: "bombs-left"
 }
 

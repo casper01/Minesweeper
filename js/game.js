@@ -32,7 +32,7 @@ module.exports = class Game {
     reset() {
         this.rows = 8;
         this.cols = 8;
-        this.bombsCount = 10;
+        this.bombsCount = 10;   // TODO: powtorzenie
         this.cells = this._generateRandomMap();
         this.secondsPassed = 0;
         this.timer = this._setTimer();
@@ -186,11 +186,13 @@ module.exports = class Game {
     _setGameWon() {
         this._status = settings.gameStatus.won;
         this._showAllCells(false);
+        clearInterval(this.timer);
     }
     
     _setGameLost() {
         this._status = settings.gameStatus.lost;
         this._showAllCells(true);
+        clearInterval(this.timer);
     }
 
 
@@ -246,8 +248,7 @@ module.exports = class Game {
                     this._showCell(r, c);
                 }
                 else if (!cell.isMarked() && !showBombs) {
-                    cell.toggleMarking();
-                    this.ctx.flipTo(r, c, cell.front);
+                    this._setFlagToCell(r, c);
                 }
             }
         }
@@ -262,8 +263,21 @@ module.exports = class Game {
         }
     }
 
+    _updateBombsLeft(val) {
+        this.bombsCount = val;
+        this.ctx.setBombsLeft(this.bombsCount);
+    }
+
     _setFlagToCell(row, col) {
         let cell = this.cells[row][col];
+
+        if (cell.isMarked()) {
+            this._updateBombsLeft(this.bombsCount + 1);
+        }
+        else {
+            this._updateBombsLeft(this.bombsCount - 1);
+        }
+
         cell.toggleMarking();
         this.ctx.flipTo(row, col, cell.front);
     }
