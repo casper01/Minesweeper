@@ -11,3 +11,7 @@ div {
 .flip{
     transform: rotateX(-180deg);
 }
+
+.before, .after {
+    z-index: 10;
+}

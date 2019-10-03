@@ -99,11 +99,17 @@ module.exports = class Context {
     }
 
     showVictoryScreen() {
-
+        document.body.classList.add("pyro");
+        setTimeout(function() {
+            document.body.classList.remove("pyro");
+        }, settings.victoryScreenTime);
     }
-
+    
     showFailureScreen() {
-
+        document.body.classList.add("shake-hard");
+        setTimeout(function() {
+            document.body.classList.remove("shake-hard");
+        }, settings.failureScreenTime);
     }
 
     _createTable() {
@@ -448,12 +454,14 @@ module.exports = class Game {
         this._status = settings.gameStatus.won;
         this._showAllCells(false);
         clearInterval(this.timer);
+        this.ctx.showVictoryScreen();
     }
     
     _setGameLost() {
         this._status = settings.gameStatus.lost;
         this._showAllCells(true);
         clearInterval(this.timer);
+        this.ctx.showFailureScreen();
     }
 
 
@@ -587,7 +595,9 @@ module.exports = {
         playing: "playing"
     },
     timerId: "timer",
-    bombsLeftId: "bombs-left"
+    bombsLeftId: "bombs-left",
+    victoryScreenTime: 5000,
+    failureScreenTime: 500
 }
 
 

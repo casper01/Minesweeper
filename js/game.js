@@ -187,12 +187,14 @@ module.exports = class Game {
         this._status = settings.gameStatus.won;
         this._showAllCells(false);
         clearInterval(this.timer);
+        this.ctx.showVictoryScreen();
     }
     
     _setGameLost() {
         this._status = settings.gameStatus.lost;
         this._showAllCells(true);
         clearInterval(this.timer);
+        this.ctx.showFailureScreen();
     }
 
 

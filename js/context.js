@@ -35,11 +35,17 @@ module.exports = class Context {
     }
 
     showVictoryScreen() {
-
+        document.body.classList.add("pyro");
+        setTimeout(function() {
+            document.body.classList.remove("pyro");
+        }, settings.victoryScreenTime);
     }
-
+    
     showFailureScreen() {
-
+        document.body.classList.add("shake-hard");
+        setTimeout(function() {
+            document.body.classList.remove("shake-hard");
+        }, settings.failureScreenTime);
     }
 
     _createTable() {
