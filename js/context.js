@@ -7,12 +7,20 @@ module.exports = class Context {
         this._initHTML();
         this.rows = rows;
         this.cols = cols;
-        this.cellWidth = 100;
+        this.cellWidth = Math.min(this.boardAreaWidth() / this.cols, this.boardAreaHeight() / this.rows);
         this._onCellClickHandler = onCellClickHandler;
         this._onLevelChangeHandler = onLevelChangeHandler;
         this._initSelectBox();
         this.divsTable = this._createTable();
         this.setLevel(levelInd);
+    }
+
+    boardAreaWidth() {
+        return document.body.clientWidth;
+    }
+
+    boardAreaHeight() {
+        return document.body.clientHeight - document.getElementById("top-menu").offsetHeight - 18;
     }
 
     flipTo(row, col, type) {
@@ -96,6 +104,7 @@ module.exports = class Context {
         table.setAttribute("cellspacing", "0");
         table.setAttribute("cellpadding", "0");
         table.style.background = "#191716";
+        table.style.margin = "auto";
     }
 
     _setMapCellAttributes(td) {
@@ -213,21 +222,7 @@ module.exports = class Context {
     _initSelectBox() {
         let self = this;
         var x, i, j, selElmnt, a, b, c;
-
-        // TODO: no chyba niepotrzebne
-        // function selectOption(selectedInd) {
-        //     let div = document.getElementsByClassName("select-items")[0].childNodes[selectedInd];
-        //     let s = document.getElementById("levelSelector");
-
-        //     s.selectedIndex = i;
-        //     h.innerHTML = this.innerHTML;
-        //     y = this.parentNode.getElementsByClassName("same-as-selected");
-        //     for (k = 0; k < y.length; k++) {
-        //         y[k].removeAttribute("class");
-        //     }
-        //     this.setAttribute("class", "same-as-selected");
-        // }
-
+        
         /* Look for any elements with the class "custom-select": */
         x = document.getElementsByClassName("custom-select");
         for (i = 0; i < x.length; i++) {
@@ -308,13 +303,14 @@ module.exports = class Context {
     }
 
     _initHTML() {
-        document.body.innerHTML = `<div class="infobox">
+        document.body.innerHTML = `<div id="top-menu" class="infobox">
         Level:
         <div class="custom-select" style="width:100px;">
             <select id="levelSelector">
                 <option value="0" selected="selected">&#9733;</option>
                 <option value="1">&#9733;&#9733;</option>
                 <option value="2">&#9733;&#9733;&#9733;</option>
+                <option value="3">&#9733;&#9733;&#9733;&#9733;</option>
             </select>
         </div>
         

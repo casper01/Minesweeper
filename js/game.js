@@ -7,11 +7,9 @@ module.exports = class Game {
      * @param {Context} ctx - context of the screen
      */
     constructor() {
-        this.level = 1;
-        this.rows = 8;
-        this.cols = 8;
-        this.levelBombs = 10;
-        this.ctx = new Context(this.rows, this.cols, this.level, this.onCellClicked.bind(this), this.setLevelConfig.bind(this));
+        this.level = 0;
+        this.setLevelConfig();
+        this.ctx = new Context(this.rows, this.cols, this.level, this.onCellClicked.bind(this), this.onLevelChangeHandler.bind(this));
         this.reset();
     }
 
@@ -31,7 +29,7 @@ module.exports = class Game {
      * Reset game to new, unplayed game
      */
     reset() {
-        this.bombsCount = this.levelBombs;
+        this.setLevelConfig();
         this.cells = this._generateRandomMap();
         this.secondsPassed = 0;
         clearInterval(this.timer);
@@ -132,28 +130,23 @@ module.exports = class Game {
         return bombs;
     }
 
-    setLevelConfig(newLevel) {
-        switch (parseInt(newLevel)) {
-            case 0:
-                this.rows = 4;
-                this.cols = 4;
-                this.levelBombs = 5;
-                console.log("1");
-                break;
-            case 1:
-                this.rows = 8;
-                this.cols = 8;
-                this.levelBombs = 10;
-                console.log("2");
-                break;
-            case 2:
-                this.rows = 10;
-                this.cols = 10;
-                this.levelBombs = 12;
-                console.log("3");
-                break;
+    setLevelConfig() {
+        let levelSettings = settings.levels[parseInt(this.level)];
+        this.rows = levelSettings.rows;
+        this.cols = levelSettings.cols;
+        this.bombsCount = levelSettings.bombs;
+
+        if (this.rows < this.cols && this.ctx.boardAreaWidth() < this.ctx.boardAreaHeight()) {
+            let temp = this.rows;
+            this.rows = this.cols;
+            this.cols = temp;
         }
-        this.ctx = new Context(this.rows, this.cols, newLevel, this.onCellClicked.bind(this), this.setLevelConfig.bind(this));
+    }
+
+    onLevelChangeHandler(newLevel) {
+        this.level = newLevel;
+        this.setLevelConfig();
+        this.ctx = new Context(this.rows, this.cols, newLevel, this.onCellClicked.bind(this), this.onLevelChangeHandler.bind(this));
         this.reset();
     }
 

@@ -28,6 +28,28 @@ module.exports = {
         lost: "lost",
         playing: "playing"
     },
+    levels: [
+        { 
+            rows: 8,
+            cols: 8,
+            bombs: 10
+        },
+        { 
+            rows: 7,
+            cols: 12,
+            bombs: 17
+        },
+        { 
+            rows: 16,
+            cols: 16,
+            bombs: 40
+        },
+        { 
+            rows: 16,
+            cols: 30,
+            bombs: 99
+        }
+    ],
     timerId: "timer",
     bombsLeftId: "bombs-left",
     victoryScreenTime: 5000,
