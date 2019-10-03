@@ -14,6 +14,19 @@ module.exports = {
         emptyCell: "./images/empty.png",
         bomb: "./images/bomb.png",
         bombClicked: "./images/bombClicked.png"
+    },
+    cellType: {
+        bomb: "bomb",
+        firstBomb: "firstBomb",
+        empty: "empty",
+        marked: "flag",
+        falselyMarked: "falselyMarked",
+        hidden: "hidden"
+    },
+    gameStatus: {
+        won: "won",
+        lost: "lost",
+        playing: "playing"
     }
 }
 
