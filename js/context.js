@@ -29,11 +29,11 @@ module.exports = class Context {
         let backDiv = this.divsTable[row][col].backDiv;
         if (cell.classList.contains("flip")) {
             this._setDivBackgroundImage(frontDiv, this._getCellBackImage(type));
-            cell.classList.toggle("flip");  // TODO: moze jakas stala
+            cell.classList.toggle("flip");
         }
         else {
             this._setDivBackgroundImage(backDiv, this._getCellBackImage(type));
-            cell.classList.toggle("flip");  // TODO: moze jakas stala
+            cell.classList.toggle("flip");
         }
 
     }
@@ -297,9 +297,6 @@ module.exports = class Context {
         /* If the user clicks anywhere outside the select box,
         then close all select boxes: */
         document.addEventListener("click", closeAllSelect);
-
-        // selecting an option // TODO: zapetla sie
-        // document.getElementsByClassName("select-items")[0].childNodes[selectedIndex].click();
     }
 
     _initHTML() {
