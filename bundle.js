@@ -67,14 +67,16 @@ module.exports = class Cell {
 var settings = require("./settings.js");
 
 module.exports = class Context {
-    constructor(rows, cols, levelInd, onCellClickHandler, onLevelChangeHandler) {
+    constructor(rows, cols, levelInd, onCellClickHandler, onLevelChangeHandler, onMousebuttonsChangeHandler) {
         this._initHTML();
         this.rows = rows;
         this.cols = cols;
         this.cellWidth = Math.min(this.boardAreaWidth() / this.cols, this.boardAreaHeight() / this.rows);
         this._onCellClickHandler = onCellClickHandler;
         this._onLevelChangeHandler = onLevelChangeHandler;
+        this._onMousebuttonsChangeHandler = onMousebuttonsChangeHandler;
         this._initSelectBox();
+        this._initChoiceBox();
         this.divsTable = this._createTable();
         this.setLevel(levelInd);
     }
@@ -93,11 +95,11 @@ module.exports = class Context {
         let backDiv = this.divsTable[row][col].backDiv;
         if (cell.classList.contains("flip")) {
             this._setDivBackgroundImage(frontDiv, this._getCellBackImage(type));
-            cell.classList.toggle("flip");  // TODO: moze jakas stala
+            cell.classList.toggle("flip");
         }
         else {
             this._setDivBackgroundImage(backDiv, this._getCellBackImage(type));
-            cell.classList.toggle("flip");  // TODO: moze jakas stala
+            cell.classList.toggle("flip");
         }
 
     }
@@ -283,6 +285,27 @@ module.exports = class Context {
         div.style.backgroundImage = 'url("' + imageUrl + '")';
     }
 
+    _initChoiceBox() {
+        document.getElementById("loupeChoice").classList.add("active-choice");
+        let self = this;
+        function click(clickedChoiceId, releasedChoiceId) {
+            if (document.getElementById(clickedChoiceId).classList.contains("active-choice")) {
+                return;
+            }
+            document.getElementById(clickedChoiceId).classList.add("active-choice");
+            document.getElementById(releasedChoiceId).classList.remove("active-choice");
+            self._onMousebuttonsChangeHandler();
+        }
+
+        document.getElementById("loupeChoice").onclick = function() {
+            click("loupeChoice", "flagChoice");
+        };
+        document.getElementById("flagChoice").onclick = function() {
+            click("flagChoice", "loupeChoice");
+        };
+        
+    }
+
     _initSelectBox() {
         let self = this;
         var x, i, j, selElmnt, a, b, c;
@@ -361,15 +384,12 @@ module.exports = class Context {
         /* If the user clicks anywhere outside the select box,
         then close all select boxes: */
         document.addEventListener("click", closeAllSelect);
-
-        // selecting an option // TODO: zapetla sie
-        // document.getElementsByClassName("select-items")[0].childNodes[selectedIndex].click();
     }
 
     _initHTML() {
         document.body.innerHTML = `<div id="top-menu" class="infobox">
         Level:
-        <div class="custom-select" style="width:100px;">
+        <div class="custom-select">
             <select id="levelSelector">
                 <option value="0" selected="selected">&#9733;</option>
                 <option value="1">&#9733;&#9733;</option>
@@ -390,6 +410,16 @@ module.exports = class Context {
             </div>
             <div id="bombs-left" class="text"></div>
         </div>
+        <div class="info-element">
+            <div class="choices">
+                <div id="loupeChoice" class="image choice">
+                    <img src="images/loupeIcon.png" />
+                </div>
+                <div id="flagChoice" class="image choice">
+                    <img src="images/flagIcon.png" />
+                </div>
+            </div>
+        </div>
     </div>
     <div class="before"></div>
     <div class="after"></div>`;
@@ -407,7 +437,7 @@ module.exports = class Game {
     constructor() {
         this.level = 0;
         this.setLevelConfig();
-        this.ctx = new Context(this.rows, this.cols, this.level, this.onCellClicked.bind(this), this.onLevelChangeHandler.bind(this));
+        this.ctx = new Context(this.rows, this.cols, this.level, this.onCellClicked.bind(this), this.onLevelChangeHandler.bind(this), this.onMousebuttonsChange.bind(this));
         this.reset();
     }
 
@@ -436,6 +466,7 @@ module.exports = class Game {
         this._status = "playing";
         this.ctx.setClock(0);
         this.ctx.setBombsLeft(this.bombsCount);
+        this._mousebuttonsReversed = false;
     }
 
     _generateRandomMap() {
@@ -544,8 +575,12 @@ module.exports = class Game {
     onLevelChangeHandler(newLevel) {
         this.level = newLevel;
         this.setLevelConfig();
-        this.ctx = new Context(this.rows, this.cols, newLevel, this.onCellClicked.bind(this), this.onLevelChangeHandler.bind(this));
+        this.ctx = new Context(this.rows, this.cols, newLevel, this.onCellClicked.bind(this), this.onLevelChangeHandler.bind(this), this.onMousebuttonsChange.bind(this));
         this.reset();
+    }
+
+    onMousebuttonsChange() {
+        this._mousebuttonsReversed = !this._mousebuttonsReversed;
     }
 
     /**
@@ -559,6 +594,10 @@ module.exports = class Game {
             this._hideAllCells();
             this.reset();
             return;
+        }
+
+        if (this._mousebuttonsReversed) {
+            mouseButton = mouseButton == "left" ? "right" : "left";
         }
 
         if (mouseButton == "left") {

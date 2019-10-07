@@ -9,7 +9,7 @@ module.exports = class Game {
     constructor() {
         this.level = 0;
         this.setLevelConfig();
-        this.ctx = new Context(this.rows, this.cols, this.level, this.onCellClicked.bind(this), this.onLevelChangeHandler.bind(this));
+        this.ctx = new Context(this.rows, this.cols, this.level, this.onCellClicked.bind(this), this.onLevelChangeHandler.bind(this), this.onMousebuttonsChange.bind(this));
         this.reset();
     }
 
@@ -38,6 +38,7 @@ module.exports = class Game {
         this._status = "playing";
         this.ctx.setClock(0);
         this.ctx.setBombsLeft(this.bombsCount);
+        this._mousebuttonsReversed = false;
     }
 
     _generateRandomMap() {
@@ -146,8 +147,12 @@ module.exports = class Game {
     onLevelChangeHandler(newLevel) {
         this.level = newLevel;
         this.setLevelConfig();
-        this.ctx = new Context(this.rows, this.cols, newLevel, this.onCellClicked.bind(this), this.onLevelChangeHandler.bind(this));
+        this.ctx = new Context(this.rows, this.cols, newLevel, this.onCellClicked.bind(this), this.onLevelChangeHandler.bind(this), this.onMousebuttonsChange.bind(this));
         this.reset();
+    }
+
+    onMousebuttonsChange() {
+        this._mousebuttonsReversed = !this._mousebuttonsReversed;
     }
 
     /**
@@ -161,6 +166,10 @@ module.exports = class Game {
             this._hideAllCells();
             this.reset();
             return;
+        }
+
+        if (this._mousebuttonsReversed) {
+            mouseButton = mouseButton == "left" ? "right" : "left";
         }
 
         if (mouseButton == "left") {

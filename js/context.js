@@ -3,14 +3,16 @@
 var settings = require("./settings.js");
 
 module.exports = class Context {
-    constructor(rows, cols, levelInd, onCellClickHandler, onLevelChangeHandler) {
+    constructor(rows, cols, levelInd, onCellClickHandler, onLevelChangeHandler, onMousebuttonsChangeHandler) {
         this._initHTML();
         this.rows = rows;
         this.cols = cols;
         this.cellWidth = Math.min(this.boardAreaWidth() / this.cols, this.boardAreaHeight() / this.rows);
         this._onCellClickHandler = onCellClickHandler;
         this._onLevelChangeHandler = onLevelChangeHandler;
+        this._onMousebuttonsChangeHandler = onMousebuttonsChangeHandler;
         this._initSelectBox();
+        this._initChoiceBox();
         this.divsTable = this._createTable();
         this.setLevel(levelInd);
     }
@@ -219,6 +221,27 @@ module.exports = class Context {
         div.style.backgroundImage = 'url("' + imageUrl + '")';
     }
 
+    _initChoiceBox() {
+        document.getElementById("loupeChoice").classList.add("active-choice");
+        let self = this;
+        function click(clickedChoiceId, releasedChoiceId) {
+            if (document.getElementById(clickedChoiceId).classList.contains("active-choice")) {
+                return;
+            }
+            document.getElementById(clickedChoiceId).classList.add("active-choice");
+            document.getElementById(releasedChoiceId).classList.remove("active-choice");
+            self._onMousebuttonsChangeHandler();
+        }
+
+        document.getElementById("loupeChoice").onclick = function() {
+            click("loupeChoice", "flagChoice");
+        };
+        document.getElementById("flagChoice").onclick = function() {
+            click("flagChoice", "loupeChoice");
+        };
+        
+    }
+
     _initSelectBox() {
         let self = this;
         var x, i, j, selElmnt, a, b, c;
@@ -302,7 +325,7 @@ module.exports = class Context {
     _initHTML() {
         document.body.innerHTML = `<div id="top-menu" class="infobox">
         Level:
-        <div class="custom-select" style="width:100px;">
+        <div class="custom-select">
             <select id="levelSelector">
                 <option value="0" selected="selected">&#9733;</option>
                 <option value="1">&#9733;&#9733;</option>
@@ -322,6 +345,16 @@ module.exports = class Context {
                 <img src="images/bombIcon.png" />
             </div>
             <div id="bombs-left" class="text"></div>
+        </div>
+        <div class="info-element">
+            <div class="choices">
+                <div id="loupeChoice" class="image choice">
+                    <img src="images/loupeIcon.png" />
+                </div>
+                <div id="flagChoice" class="image choice">
+                    <img src="images/flagIcon.png" />
+                </div>
+            </div>
         </div>
     </div>
     <div class="before"></div>

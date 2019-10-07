@@ -22,6 +22,7 @@ div {
     color: #00529b;
     background-color: #bde5f8;
     border: 2px solid;
+    font-size: 1.7em;
 }
 
 .info-element {
@@ -39,8 +40,28 @@ div {
     min-width: 50px;
 }
 
+.info-element .choices {
+    display: inline-table;
+    min-width: 50px;
+    background: rgba(0,82,155,0.1);
+}
+
+.image.choice {
+    display: table-cell;
+    padding: 5px 20px;
+}
+
+.image.choice:hover {
+    display: table-cell;
+    background: rgba(0,82,155,0.5);
+}
+
+.active-choice {
+    background: rgba(0,82,155,0.3);
+}
+
 .info-element .image img {
-    width: 30px;
+    width: 40px;
     vertical-align: middle;
 }
 
@@ -53,6 +74,7 @@ div {
 .custom-select {
     position: relative;
     display: inline-block;
+    width: 150px;
   }
   
   .custom-select select {
@@ -74,6 +96,7 @@ div {
     border: 1px solid transparent;
     border-color: transparent;
     cursor: pointer;
+    z-index: 99;
   }
   
   /* Style items (options): */
