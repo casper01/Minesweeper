@@ -164,6 +164,7 @@ module.exports = class Game {
     onCellClicked(mouseButton, row, col) {
         if (this.isOver()) {
             this._hideAllCells();
+            this.ctx.resetMouseButtons();
             this.reset();
             return;
         }

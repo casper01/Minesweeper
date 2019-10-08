@@ -40,6 +40,10 @@ module.exports = class Context {
 
     }
 
+    resetMouseButtons() {
+        document.getElementById("loupeChoice").click();
+    }
+
     setLevel(levelInd) {
         let select = document.getElementById("levelSelector");
         let levelGraphics = select.options[levelInd].innerHTML;
